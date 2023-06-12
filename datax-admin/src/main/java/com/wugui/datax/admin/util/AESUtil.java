@@ -19,6 +19,8 @@ public class AESUtil {
     private static String DEFAULT_CIPHER_ALGORITHM = "SHA1PRNG";
     private static String KEY_ALGORITHM = "AES";
 
+    private static String FUSION_LOWCODE_KEY = "AD42F6697B035B75";
+
     /**
      * 加密
      *
@@ -77,6 +79,21 @@ public class AESUtil {
         return keygen;
     }
 
+    private static KeyGenerator getKeyGeneratorByFusionLowcode() {
+
+        KeyGenerator keygen = null;
+        try {
+            keygen = KeyGenerator.getInstance(KEY_ALGORITHM);
+            SecureRandom secureRandom = SecureRandom.getInstance(DEFAULT_CIPHER_ALGORITHM);
+            secureRandom.setSeed(FUSION_LOWCODE_KEY.getBytes());
+            keygen.init(128, secureRandom);
+        } catch (NoSuchAlgorithmException e) {
+            log.warn("Get key generator error {}", e.getMessage());
+        }
+
+        return keygen;
+    }
+
     public static String encrypt(String message) {
         try {
             KeyGenerator keygen = getKeyGenerator();
@@ -88,6 +105,17 @@ public class AESUtil {
         return null;
     }
 
+    public static String encryptByFusionLowcode(String message) {
+        try {
+            KeyGenerator keygen = getKeyGeneratorByFusionLowcode();
+            SecretKey secretKey = new SecretKeySpec(keygen.generateKey().getEncoded(), KEY_ALGORITHM);
+            return Base64.getEncoder().encodeToString(encrypt(secretKey, message.getBytes(StandardCharsets.UTF_8)));
+        } catch (Exception e) {
+            log.warn("content encryptByFusionLowcode error {}", e.getMessage());
+        }
+        return null;
+    }
+
     public static String decrypt(String ciphertext) {
         try {
             KeyGenerator keygen = getKeyGenerator();
@@ -95,6 +123,17 @@ public class AESUtil {
             return new String(decrypt(secretKey, Base64.getDecoder().decode(ciphertext)), StandardCharsets.UTF_8);
         } catch (Exception e) {
             log.warn("content decrypt error {}", e.getMessage());
+        }
+        return null;
+    }
+
+    public static String decryptByFusionLowcode(String ciphertext) {
+        try {
+            KeyGenerator keygen = getKeyGeneratorByFusionLowcode();
+            SecretKey secretKey = new SecretKeySpec(keygen.generateKey().getEncoded(), KEY_ALGORITHM);
+            return new String(decrypt(secretKey, Base64.getDecoder().decode(ciphertext)), StandardCharsets.UTF_8);
+        } catch (Exception e) {
+            log.warn("content decryptByFusionLowcode error {}", e.getMessage());
         }
         return null;
     }

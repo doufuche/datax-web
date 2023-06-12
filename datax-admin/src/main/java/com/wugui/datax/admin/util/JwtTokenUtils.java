@@ -31,11 +31,13 @@ public class JwtTokenUtils {
     private static final long EXPIRATION = 86400L;
 
     // 选择了记住我之后的过期时间为7天
-    private static final long EXPIRATION_REMEMBER = 7 * EXPIRATION;
+//    private static final long EXPIRATION_REMEMBER = 7 * EXPIRATION;
+    private static final long EXPIRATION_REMEMBER = 365 * EXPIRATION;
 
     // 创建token
     public static String createToken(Integer id, String username, String role, boolean isRememberMe) {
-        long expiration = isRememberMe ? EXPIRATION_REMEMBER : EXPIRATION;
+//        long expiration = isRememberMe ? EXPIRATION_REMEMBER : EXPIRATION;
+        long expiration = EXPIRATION_REMEMBER;
         HashMap<String, Object> map = new HashMap<>();
         map.put(ROLE_CLAIMS, role);
         return Jwts.builder()
@@ -81,4 +83,5 @@ public class JwtTokenUtils {
                 .parseClaimsJws(token)
                 .getBody();
     }
+
 }

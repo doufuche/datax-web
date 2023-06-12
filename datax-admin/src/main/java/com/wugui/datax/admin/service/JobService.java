@@ -93,4 +93,5 @@ public interface JobService {
      * @return
      */
     ReturnT<String> batchAdd(DataXBatchJsonBuildDto dto) throws IOException;
+
 }

@@ -1,11 +1,13 @@
 package com.wugui.datax.admin.controller;
 
+import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.api.R;
 import com.wugui.datax.admin.core.util.LocalCacheUtil;
 import com.wugui.datax.admin.entity.JobDatasource;
 import com.wugui.datax.admin.service.JobDatasourceService;
+import com.wugui.datax.admin.util.AESUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -63,6 +65,28 @@ public class JobDatasourceController extends BaseController {
     public R<List<JobDatasource>> selectAllDatasource() {
         return success(this.jobJdbcDatasourceService.selectAllDatasource());
     }
+
+    /**
+     * 通过主键查询单条数据
+     *
+     * @param entity
+     * @return 单条数据
+     */
+    @ApiOperation("通过条件查询单条数据,查询条件:jdbcUsername，jdbcUrl")
+    @PostMapping("/queryDataSource")
+    public R<JobDatasource> queryDataSource(@RequestBody JobDatasource entity) {
+        QueryWrapper<JobDatasource> queryWrapper = new QueryWrapper();
+//        String userName = AESUtil.encryptByFusionLowcode(entity.getJdbcUsername());   //真实调用时，参数是从调用方加密传递过来的
+//        String jdbcUrl = AESUtil.decryptByFusionLowcode(entity.getJdbcUrl());
+        queryWrapper.eq(StrUtil.toUnderlineCase("jdbc_username"), entity.getJdbcUsername())
+                .eq("jdbc_url", entity.getJdbcUrl());
+        List<JobDatasource> queryList = this.jobJdbcDatasourceService.list(queryWrapper);
+        if (queryList!=null && queryList.size()>0) {
+            return success(queryList.get(0));
+        }
+        return failed("queryDataSource.isNull");
+    }
+
 
     /**
      * 通过主键查询单条数据
