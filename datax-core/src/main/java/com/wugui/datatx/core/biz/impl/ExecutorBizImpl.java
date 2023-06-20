@@ -164,7 +164,10 @@ public class ExecutorBizImpl implements ExecutorBiz {
         }
 
         // push data to queue
-        ReturnT<String> pushResult = jobThread.pushTriggerQueue(triggerParam);
+        //简化版实现不用异步线程执行，即同步获取执行结果
+        ReturnT<String> pushResult = jobThread.runTrigger(triggerParam);
+        //注释代码是用异步线程池执行
+//        ReturnT<String> pushResult = jobThread.pushTriggerQueue(triggerParam);
         return pushResult;
     }
 

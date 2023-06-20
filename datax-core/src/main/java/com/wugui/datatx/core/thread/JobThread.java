@@ -72,6 +72,15 @@ public class JobThread extends Thread {
         return ReturnT.SUCCESS;
     }
 
+    public ReturnT<String> runTrigger(TriggerParam triggerParam){
+        try {
+            return handler.execute(triggerParam);
+        } catch (Exception e) {
+            logger.error("执行job异常,triggerParam:"+triggerParam, e);
+            throw new RuntimeException(e);
+        }
+    }
+
     /**
      * kill job thread
      *

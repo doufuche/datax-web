@@ -45,6 +45,15 @@ public class ProcessUtil {
             } catch (Throwable e) {
                 logger.error("get process id for unix error {0}", e);
             }
+        } else {
+            try {
+                Class<?> clazz = Class.forName("java.lang.UNIXProcess");
+                field = clazz.getDeclaredField("pid");
+                field.setAccessible(true);
+                pid = (Integer) field.get(process);
+            } catch (Throwable e) {
+                logger.error("get process id for unix error {0}", e);
+            }
         }
         return String.valueOf(pid);
     }

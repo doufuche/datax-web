@@ -44,7 +44,7 @@ public class AdminBizClient implements AdminBiz {
 
     @Override
     public ReturnT<String> registry(RegistryParam registryParam) {
-        return JobRemotingUtil.postBody(addressUrl + "api/registry", accessToken, registryParam, 3);
+        return JobRemotingUtil.postBody(addressUrl + "api/registry", accessToken, registryParam, 15);
     }
 
     @Override

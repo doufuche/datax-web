@@ -54,7 +54,7 @@ public class ExecutorJobHandler extends IJobHandler {
             String[] cmdarrayFinal = buildDataXExecutorCmd(trigger, tmpFilePath,dataXPyPath);
             final Process process = Runtime.getRuntime().exec(cmdarrayFinal);
             String prcsId = ProcessUtil.getProcessId(process);
-            JobLogger.log("------------------DataX process id: " + prcsId);
+            JobLogger.log("------------------DataX process id: {}, tmpFilePath:{}", prcsId, tmpFilePath);
             jobTmpFiles.put(prcsId, tmpFilePath);
             //update datax process id
             HandleProcessCallbackParam prcs = new HandleProcessCallbackParam(trigger.getLogId(), trigger.getLogDateTime(), prcsId);
