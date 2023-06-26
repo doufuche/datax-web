@@ -5,6 +5,7 @@ import com.wugui.datatx.core.biz.model.ReturnT;
 import com.wugui.datatx.core.util.DateUtil;
 import com.wugui.datax.admin.core.cron.CronExpression;
 import com.wugui.datax.admin.core.thread.JobTriggerPoolHelper;
+import com.wugui.datax.admin.core.trigger.JobTrigger;
 import com.wugui.datax.admin.core.trigger.TriggerTypeEnum;
 import com.wugui.datax.admin.core.util.I18nUtil;
 import com.wugui.datax.admin.dto.DataXBatchJsonBuildDto;
@@ -95,6 +96,17 @@ public class JobInfoController extends BaseController{
         }
         JobTriggerPoolHelper.trigger(dto.getJobId(), TriggerTypeEnum.MANUAL, -1, null, executorParam);
         return ReturnT.SUCCESS;
+    }
+
+    @PostMapping(value = "/runTrigger")
+    @ApiOperation("同步运行任务")
+    public ReturnT<String> runTriggerJob(@RequestBody TriggerJobDto dto) {
+        // force cover job param
+        String executorParam=dto.getExecutorParam();
+        if (executorParam == null) {
+            executorParam = "";
+        }
+        return JobTrigger.runTrigger(dto.getJobId(), TriggerTypeEnum.MANUAL, -1, null, executorParam);
     }
 
     @GetMapping("/nextTriggerTime")
