@@ -41,7 +41,7 @@ public class JobRemotingUtil {
             connection.setDoInput(true);
             connection.setUseCaches(false);
             connection.setReadTimeout(timeout * 1000);
-            connection.setConnectTimeout(15 * 1000);
+            connection.setConnectTimeout(30 * 1000);
             connection.setRequestProperty("connection", "Keep-Alive");
             connection.setRequestProperty("Content-Type", "application/json;charset=UTF-8");
             connection.setRequestProperty("Accept-Charset", "application/json;charset=UTF-8");

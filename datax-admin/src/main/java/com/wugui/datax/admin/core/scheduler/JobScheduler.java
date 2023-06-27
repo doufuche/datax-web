@@ -98,7 +98,7 @@ public class JobScheduler {
         referenceBean.setLoadBalance(LoadBalance.ROUND);
         referenceBean.setIface(ExecutorBiz.class);
         referenceBean.setVersion(null);
-        referenceBean.setTimeout(200000);
+        referenceBean.setTimeout(300000);
         referenceBean.setAddress(address);
         referenceBean.setAccessToken(JobAdminConfig.getAdminConfig().getAccessToken());
         referenceBean.setInvokeCallback(null);
