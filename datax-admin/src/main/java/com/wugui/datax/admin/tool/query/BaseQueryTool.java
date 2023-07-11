@@ -334,10 +334,10 @@ public abstract class BaseQueryTool implements QueryToolInterface {
         List<String> tables = new ArrayList<String>();
         Statement stmt = null;
         ResultSet rs = null;
+        //获取sql
+        String sql = getSQLQueryTables(tableSchema);
         try {
             stmt = connection.createStatement();
-            //获取sql
-            String sql = getSQLQueryTables(tableSchema);
             rs = stmt.executeQuery(sql);
             while (rs.next()) {
                 String tableName = rs.getString(1);
@@ -346,7 +346,7 @@ public abstract class BaseQueryTool implements QueryToolInterface {
             tables.sort(Comparator.naturalOrder());
         } catch (SQLException e) {
             logger.error("[getTableNames Exception] --> "
-                    + "the exception message is:" + e.getMessage());
+                    + "the exception message is:" + e.getMessage() + ",sql is:"+sql);
         } finally {
             JdbcUtils.close(rs);
             JdbcUtils.close(stmt);
@@ -359,10 +359,10 @@ public abstract class BaseQueryTool implements QueryToolInterface {
         List<String> tables = new ArrayList<String>();
         Statement stmt = null;
         ResultSet rs = null;
+        //获取sql
+        String sql = getSQLQueryTables();
         try {
             stmt = connection.createStatement();
-            //获取sql
-            String sql = getSQLQueryTables();
             rs = stmt.executeQuery(sql);
             while (rs.next()) {
                 String tableName = rs.getString(1);
@@ -370,7 +370,7 @@ public abstract class BaseQueryTool implements QueryToolInterface {
             }
         } catch (SQLException e) {
             logger.error("[getTableNames Exception] --> "
-                    + "the exception message is:" + e.getMessage());
+                    + "the exception message is:" + e.getMessage() + ",2sql is:"+sql);
         } finally {
             JdbcUtils.close(rs);
             JdbcUtils.close(stmt);
@@ -490,10 +490,10 @@ public abstract class BaseQueryTool implements QueryToolInterface {
         List<String> schemas = new ArrayList<>();
         Statement stmt = null;
         ResultSet rs = null;
+        //获取sql
+        String sql = getSQLQueryTableSchema();
         try {
             stmt = connection.createStatement();
-            //获取sql
-            String sql = getSQLQueryTableSchema();
             rs = stmt.executeQuery(sql);
             while (rs.next()) {
                 String tableName = rs.getString(1);
@@ -501,7 +501,7 @@ public abstract class BaseQueryTool implements QueryToolInterface {
             }
         } catch (SQLException e) {
             logger.error("[getTableNames Exception] --> "
-                    + "the exception message is:" + e.getMessage());
+                    + "the exception message is:" + e.getMessage() + ",3sql is:"+sql);
         } finally {
             JdbcUtils.close(rs);
             JdbcUtils.close(stmt);
