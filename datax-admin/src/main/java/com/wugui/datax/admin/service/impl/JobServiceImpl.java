@@ -252,7 +252,10 @@ public class JobServiceImpl implements JobService {
         }
         exists_jobInfo.setTriggerNextTime(nextTriggerTime);
         exists_jobInfo.setUpdateTime(new Date());
-
+        if(jobInfo.getTriggerStatus() == 0){
+            //start方法5秒后没有修改状态，会导致无法定时执行，暂时先修改状态为可执行
+            exists_jobInfo.setTriggerStatus(1);
+        }
         if (GlueTypeEnum.BEAN.getDesc().equals(jobInfo.getGlueType())) {
             exists_jobInfo.setJobJson(jobInfo.getJobJson());
             exists_jobInfo.setGlueSource(null);
