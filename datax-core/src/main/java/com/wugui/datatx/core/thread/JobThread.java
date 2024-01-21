@@ -74,6 +74,7 @@ public class JobThread extends Thread {
 
     public ReturnT<String> runTrigger(TriggerParam triggerParam){
         try {
+            triggerLogIdSet.add(triggerParam.getLogId());
             return handler.execute(triggerParam);
         } catch (Exception e) {
             logger.error("执行job异常,triggerParam:"+triggerParam, e);

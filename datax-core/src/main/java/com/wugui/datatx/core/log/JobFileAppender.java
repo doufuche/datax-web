@@ -33,7 +33,7 @@ public class JobFileAppender {
 	 * 	---/2017-12-25/821.log
 	 *
 	 */
-	private static String logBasePath = "/data/applogs/executor/jobhandler";
+	private static String logBasePath = "/Users/tiger/Downloads/applogs/executor/jobhandler";
 	private static String glueSrcPath = logBasePath.concat("/gluesource");
 	public static void initLogPath(String logPath){
 		// init
@@ -82,6 +82,8 @@ public class JobFileAppender {
 				.concat(File.separator)
 				.concat(String.valueOf(logId))
 				.concat(".log");
+
+		JobFileAppender.contextHolder.set(logFileName);
 		return logFileName;
 	}
 
@@ -101,6 +103,11 @@ public class JobFileAppender {
 
 		if (!logFile.exists()) {
 			try {
+				// mk base dir
+				File logPathDir = new File(logFile.getParent());
+				if (!logPathDir.exists()) {
+					logPathDir.mkdirs();
+				}
 				logFile.createNewFile();
 			} catch (IOException e) {
 				logger.error(e.getMessage(), e);

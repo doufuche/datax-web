@@ -46,7 +46,7 @@ public class XxlRpcReferenceBean {
     private Class<?> iface = null;
     private String version = null;
 
-    private long timeout = 600000;
+    private long timeout = 900000;
 
     private String address = null;
     private String accessToken = null;

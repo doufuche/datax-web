@@ -6,6 +6,8 @@ import com.wugui.datatx.core.biz.model.TriggerParam;
 import com.wugui.datatx.core.enums.ExecutorBlockStrategyEnum;
 import com.wugui.datatx.core.enums.IncrementTypeEnum;
 import com.wugui.datatx.core.glue.GlueTypeEnum;
+import com.wugui.datatx.core.log.JobFileAppender;
+import com.wugui.datatx.core.log.JobLogger;
 import com.wugui.datax.admin.core.conf.JobAdminConfig;
 import com.wugui.datax.admin.core.route.ExecutorRouteStrategyEnum;
 import com.wugui.datax.admin.core.scheduler.JobScheduler;
@@ -341,7 +343,9 @@ public class JobTrigger {
             routeAddressResult = new ReturnT<String>(ReturnT.FAIL_CODE, I18nUtil.getString("jobconf_trigger_address_empty"));
             return routeAddressResult;
         }
-
+        String logFileName = JobFileAppender.makeLogFileName(new Date(triggerParam.getLogDateTime()), triggerParam.getLogId());
+        logger.info("--------logId:{}, logFileName:{}", triggerParam.getLogId(), logFileName);
+        JobFileAppender.contextHolder.set(logFileName);
         // 4、trigger remote executor
         ReturnT<String> triggerResult = null;
         if (address != null) {
@@ -377,6 +381,8 @@ public class JobTrigger {
         jobLog.setTriggerCode(triggerResult.getCode());
         jobLog.setTriggerMsg(triggerMsgSb.toString());
         JobAdminConfig.getAdminConfig().getJobLogMapper().updateTriggerInfo(jobLog);
+        //日志记录到file
+        JobLogger.logToFile(logFileName, triggerMsgSb.toString());
 
         logger.debug(">>>>>>>>>>> datax-web trigger end, jobId:{}", jobLog.getId());
         return triggerResult;

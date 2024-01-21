@@ -43,6 +43,34 @@ public class JobLogger {
     }
 
     /**
+     * append log
+     *
+     * @param call
+     * @param appendLog
+     */
+    private static void logDetail(String logFileNameParam, StackTraceElement call, String appendLog) {
+
+        // "yyyy-MM-dd HH:mm:ss [fileName.MethodName-LineNumber] log";
+        StringBuffer buffer = new StringBuffer();
+        buffer.append(DateUtil.formatDateTime(new Date())).append(" ")
+                .append("[" + call.getFileName().replace("java", "") + call.getMethodName())
+                .append("-" + call.getLineNumber() + "]").append(" ")
+                .append(appendLog != null ? appendLog : "");
+        String formatAppendLog = buffer.toString();
+
+        String logFileName = JobFileAppender.contextHolder.get();
+        if(logFileName == null){
+            logFileName = logFileNameParam;
+            JobFileAppender.contextHolder.set(logFileName);
+        }
+        if (logFileName != null && logFileName.trim().length() > 0) {
+            JobFileAppender.appendLog(logFileName, formatAppendLog);
+        } else {
+            logger.info(">>> {}", formatAppendLog);
+        }
+    }
+
+    /**
      * append log with pattern
      *
      * @param appendLogPattern   like "aaa {} bbb {} ccc"
@@ -60,6 +88,26 @@ public class JobLogger {
 
         StackTraceElement callInfo = new Throwable().getStackTrace()[1];
         logDetail(callInfo, appendLog);
+    }
+
+    /**
+     * append log with pattern
+     *
+     * @param appendLogPattern   like "aaa {} bbb {} ccc"
+     * @param appendLogArguments like "111, true"
+     */
+    public static void logToFile(String logFileName, String appendLogPattern, Object... appendLogArguments) {
+
+        FormattingTuple ft = MessageFormatter.arrayFormat(appendLogPattern, appendLogArguments);
+        String appendLog = ft.getMessage();
+
+        /*appendLog = appendLogPattern;
+        if (appendLogArguments!=null && appendLogArguments.length>0) {
+            appendLog = MessageFormat.format(appendLogPattern, appendLogArguments);
+        }*/
+
+        StackTraceElement callInfo = new Throwable().getStackTrace()[1];
+        logDetail(logFileName, callInfo, appendLog);
     }
 
     /**

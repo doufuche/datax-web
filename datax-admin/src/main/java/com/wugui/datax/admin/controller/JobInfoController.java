@@ -106,7 +106,7 @@ public class JobInfoController extends BaseController{
         if (executorParam == null) {
             executorParam = "";
         }
-        return JobTrigger.runTrigger(dto.getJobId(), TriggerTypeEnum.MANUAL, -1, null, executorParam);
+        return JobTrigger.runTrigger(dto.getJobId(), TriggerTypeEnum.PARENT, -1, null, executorParam);
     }
 
     @GetMapping("/nextTriggerTime")
