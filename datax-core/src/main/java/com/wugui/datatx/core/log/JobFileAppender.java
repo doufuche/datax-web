@@ -33,7 +33,7 @@ public class JobFileAppender {
 	 * 	---/2017-12-25/821.log
 	 *
 	 */
-	private static String logBasePath = "/Users/tiger/Downloads/applogs/executor/jobhandler";
+	private static String logBasePath = "/home/datax/datax-web-2.1.2/modules/datax-executor/logs";
 	private static String glueSrcPath = logBasePath.concat("/gluesource");
 	public static void initLogPath(String logPath){
 		// init
