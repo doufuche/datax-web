@@ -1,6 +1,7 @@
 package com.wugui.datatx.core.biz.impl;
 
 import com.wugui.datatx.core.biz.ExecutorBiz;
+import com.wugui.datatx.core.biz.model.HandleCallbackParam;
 import com.wugui.datatx.core.biz.model.LogResult;
 import com.wugui.datatx.core.biz.model.ReturnT;
 import com.wugui.datatx.core.biz.model.TriggerParam;
@@ -12,10 +13,14 @@ import com.wugui.datatx.core.handler.IJobHandler;
 import com.wugui.datatx.core.handler.impl.GlueJobHandler;
 import com.wugui.datatx.core.handler.impl.ScriptJobHandler;
 import com.wugui.datatx.core.log.JobFileAppender;
+import com.wugui.datatx.core.log.JobLogger;
 import com.wugui.datatx.core.thread.JobThread;
+import com.wugui.datatx.core.thread.TriggerCallbackThread;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.Date;
 
 
@@ -58,7 +63,6 @@ public class ExecutorBizImpl implements ExecutorBiz {
     public ReturnT<LogResult> log(long logDateTim, long logId, int fromLineNum) {
         // log filename: logPath/yyyy-MM-dd/9999.log
         String logFileName = JobFileAppender.makeLogFileName(new Date(logDateTim), logId);
-
         LogResult logResult = JobFileAppender.readLog(logFileName, fromLineNum);
         return new ReturnT<>(logResult);
     }
@@ -163,12 +167,68 @@ public class ExecutorBizImpl implements ExecutorBiz {
             jobThread = JobExecutor.registJobThread(triggerParam.getJobId(), jobHandler, removeOldReason);
         }
 
-        // push data to queue
-        //简化版实现不用异步线程执行，即同步获取执行结果
-        ReturnT<String> pushResult = jobThread.runTrigger(triggerParam);
-        //注释代码是用异步线程池执行
-//        ReturnT<String> pushResult = jobThread.pushTriggerQueue(triggerParam);
-        return pushResult;
+        ReturnT<String> executeResult = null;
+        executeResult = runTrigger(triggerParam, jobThread, executeResult);
+
+        return executeResult;
+    }
+
+    /**
+     * 同步获取执行结果
+     * @param triggerParam
+     * @param jobThread
+     * @param executeResult
+     * @return
+     */
+    public static ReturnT<String> runTrigger(TriggerParam triggerParam, JobThread jobThread, ReturnT<String> executeResult) {
+        boolean toStop = false;
+        try{
+            executeResult = jobThread.runTrigger(triggerParam);
+            if (executeResult == null) {
+                executeResult = IJobHandler.FAIL;
+            } else {
+                executeResult.setMsg(
+                        (executeResult != null && executeResult.getMsg() != null && executeResult.getMsg().length() > 50000)
+                                ? executeResult.getMsg().substring(0, 50000).concat("...")
+                                : executeResult.getMsg());
+                executeResult.setContent(null);    // limit obj size
+            }
+            JobLogger.log("<br>----------- datax-web job execute end(finish) -----------<br>----------- ReturnT:" + executeResult);
+
+        } catch (Throwable e) {
+            if (toStop) {
+                JobLogger.log("<br>----------- JobThread toStop");
+            }
+
+            StringWriter stringWriter = new StringWriter();
+            e.printStackTrace(new PrintWriter(stringWriter));
+            String errorMsg = stringWriter.toString();
+            executeResult = new ReturnT<>(ReturnT.FAIL_CODE, errorMsg);
+
+            JobLogger.log("<br>----------- JobThread Exception:" + errorMsg + "<br>----------- datax-web job execute end(error) -----------");
+        } finally {
+            // 终止操作暂不监控状态
+            if (triggerParam != null && triggerParam.getJobId() != -1) {
+                // callback handler info
+                if (!toStop) {
+                    // commonm
+                    TriggerCallbackThread.pushCallBack(new HandleCallbackParam(triggerParam.getLogId(), triggerParam.getLogDateTime(), executeResult));
+                } else {
+                    // is killed
+                    ReturnT<String> stopResult = new ReturnT<String>(ReturnT.FAIL_CODE, " [job running, killed]");
+                    TriggerCallbackThread.pushCallBack(new HandleCallbackParam(triggerParam.getLogId(), triggerParam.getLogDateTime(), stopResult));
+                }
+            }
+        }
+
+        if (triggerParam != null) {
+            // is killed
+            ReturnT<String> stopResult = new ReturnT<String>(ReturnT.FAIL_CODE, " [job not executed, in the job queue, killed.]");
+            TriggerCallbackThread.pushCallBack(new HandleCallbackParam(triggerParam.getLogId(), triggerParam.getLogDateTime(), stopResult));
+        }
+
+        logger.info(">>>>>>>>>>> datax-web JobThread stoped, hashCode:{}", Thread.currentThread());
+        return executeResult;
     }
 
 }

@@ -1,6 +1,7 @@
 package com.wugui.datax.admin.controller;
 
 import com.wugui.datatx.core.biz.ExecutorBiz;
+import com.wugui.datatx.core.biz.impl.ExecutorBizImpl;
 import com.wugui.datatx.core.biz.model.LogResult;
 import com.wugui.datatx.core.biz.model.ReturnT;
 import com.wugui.datatx.core.util.DateUtil;
@@ -77,6 +78,8 @@ public class JobLogController {
             ExecutorBiz executorBiz = JobScheduler.getExecutorBiz(executorAddress);
             ReturnT<LogResult> logResult = executorBiz.log(triggerTime, logId, fromLineNum);
 
+            executorBiz = new ExecutorBizImpl();
+            ReturnT<LogResult> logResult2 = executorBiz.log(triggerTime, logId, fromLineNum);
             // is end
             if (logResult.getContent() != null && fromLineNum > logResult.getContent().getToLineNum()) {
                 JobLog jobLog = jobLogMapper.load(logId);
@@ -84,7 +87,10 @@ public class JobLogController {
                     logResult.getContent().setEnd(true);
                 }
             }
-
+            StringBuffer stringBuffer = new StringBuffer();
+            stringBuffer.append(logResult.getContent().getLogContent()).append("\n").append("<br/>")
+                    .append(logResult2.getContent().getLogContent());
+            logResult.getContent().setLogContent(stringBuffer.toString());
             return logResult;
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
