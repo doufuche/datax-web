@@ -221,13 +221,7 @@ public class ExecutorBizImpl implements ExecutorBiz {
             }
         }
 
-        if (triggerParam != null) {
-            // is killed
-            ReturnT<String> stopResult = new ReturnT<String>(ReturnT.FAIL_CODE, " [job not executed, in the job queue, killed.]");
-            TriggerCallbackThread.pushCallBack(new HandleCallbackParam(triggerParam.getLogId(), triggerParam.getLogDateTime(), stopResult));
-        }
-
-        logger.info(">>>>>>>>>>> datax-web JobThread stoped, hashCode:{}", Thread.currentThread());
+        logger.info(">>>>>>>>>>> datax-web JobThread stoped, thread:{}", Thread.currentThread());
         return executeResult;
     }
 
