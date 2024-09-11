@@ -67,6 +67,11 @@ public class AdminBizImpl implements AdminBiz {
     }
 
 
+    /**
+     * 上一个任务执行成功后回调，回调成功则判断是否有子任务，有子任务则遍历触发
+     * @param handleCallbackParam
+     * @return
+     */
     private ReturnT<String> callback(HandleCallbackParam handleCallbackParam) {
         // valid log item
         JobLog log = jobLogMapper.load(handleCallbackParam.getLogId());

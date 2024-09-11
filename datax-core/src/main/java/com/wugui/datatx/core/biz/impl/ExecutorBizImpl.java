@@ -76,7 +76,7 @@ public class ExecutorBizImpl implements ExecutorBiz {
 
         // valid：jobHandler + jobThread
         GlueTypeEnum glueTypeEnum = GlueTypeEnum.match(triggerParam.getGlueType());
-        if (GlueTypeEnum.BEAN == glueTypeEnum) {
+        if (GlueTypeEnum.BEAN == glueTypeEnum || GlueTypeEnum.BEAN_SYNC == glueTypeEnum) {
 
             // new jobhandler
             IJobHandler newJobHandler = JobExecutor.loadJobHandler(triggerParam.getExecutorHandler());
@@ -167,10 +167,15 @@ public class ExecutorBizImpl implements ExecutorBiz {
             jobThread = JobExecutor.registJobThread(triggerParam.getJobId(), jobHandler, removeOldReason);
         }
 
-        ReturnT<String> executeResult = null;
-        executeResult = runTrigger(triggerParam, jobThread, executeResult);
+        if (GlueTypeEnum.BEAN_SYNC == glueTypeEnum) {
+            ReturnT<String> executeResult = null;
+            executeResult = runTrigger(triggerParam, jobThread, executeResult);
+            return executeResult;
+        }
+        // push data to queue
+        ReturnT<String> pushResult = jobThread.pushTriggerQueue(triggerParam);
+        return pushResult;
 
-        return executeResult;
     }
 
     /**

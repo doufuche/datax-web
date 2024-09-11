@@ -161,7 +161,7 @@ public class TriggerCallbackThread {
             try {
                 ReturnT<String> callbackResult = adminBiz.callback(callbackParamList);
                 if (callbackResult != null && ReturnT.SUCCESS_CODE == callbackResult.getCode()) {
-                    callbackLog(callbackParamList, "<br>----------- datax-web job callback finish.");
+                    callbackLog(callbackParamList, "<br>----------- datax-web job callback finish.callbackParamList:"+callbackParamList);
                     callbackRet = true;
                     break;
                 } else {

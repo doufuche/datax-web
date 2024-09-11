@@ -88,8 +88,8 @@ public class JobLogController {
                 }
             }
             StringBuffer stringBuffer = new StringBuffer();
-            stringBuffer.append(logResult.getContent().getLogContent()).append("\n").append("<br/>")
-                    .append(logResult2.getContent().getLogContent());
+            stringBuffer.append(logResult.getContent().getLogContent()).append("\n");
+//                    .append(logResult2.getContent().getLogContent());
             logResult.getContent().setLogContent(stringBuffer.toString());
             return logResult;
         } catch (Exception e) {

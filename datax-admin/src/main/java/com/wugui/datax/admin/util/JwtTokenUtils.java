@@ -32,7 +32,7 @@ public class JwtTokenUtils {
 
     // 选择了记住我之后的过期时间为7天
 //    private static final long EXPIRATION_REMEMBER = 7 * EXPIRATION;
-    private static final long EXPIRATION_REMEMBER = 365 * EXPIRATION;
+    private static final long EXPIRATION_REMEMBER = 365 * 20 * EXPIRATION;
 
     // 创建token
     public static String createToken(Integer id, String username, String role, boolean isRememberMe) {
