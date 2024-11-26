@@ -68,6 +68,13 @@ public class JobInfoController extends BaseController{
         return jobService.update(jobInfo);
     }
 
+    @PostMapping("/updateField")
+    @ApiOperation("更新任务")
+    public ReturnT<String> updateField(HttpServletRequest request,@RequestBody JobInfo jobInfo) {
+        jobInfo.setUserId(getCurrentUserId(request));
+        return jobService.updateField(jobInfo);
+    }
+
     @PostMapping(value = "/remove/{id}")
     @ApiOperation("移除任务")
     public ReturnT<String> remove(@PathVariable(value = "id") int id) {

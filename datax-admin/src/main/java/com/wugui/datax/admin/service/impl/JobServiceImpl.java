@@ -1,5 +1,7 @@
 package com.wugui.datax.admin.service.impl;
 
+import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.bean.copier.CopyOptions;
 import com.wugui.datatx.core.biz.model.ReturnT;
 import com.wugui.datatx.core.enums.ExecutorBlockStrategyEnum;
 import com.wugui.datatx.core.glue.GlueTypeEnum;
@@ -265,6 +267,91 @@ public class JobServiceImpl implements JobService {
         }
         exists_jobInfo.setGlueUpdatetime(new Date());
         jobInfoMapper.update(exists_jobInfo);
+
+
+        return ReturnT.SUCCESS;
+    }
+
+    @Override
+    public ReturnT<String> updateField(JobInfo jobInfo) {
+
+        // valid
+        if (StringUtils.isNotEmpty(jobInfo.getJobCron()) && !CronExpression.isValidExpression(jobInfo.getJobCron())) {
+            return new ReturnT<>(ReturnT.FAIL_CODE, I18nUtil.getString("jobinfo_field_cron_invalid"));
+        }
+        if (StringUtils.isNotEmpty(jobInfo.getJobJson()) && jobInfo.getGlueType().equals(GlueTypeEnum.BEAN.getDesc()) && jobInfo.getJobJson().trim().length() <= 2) {
+            return new ReturnT<>(ReturnT.FAIL_CODE, (I18nUtil.getString("system_please_input") + I18nUtil.getString("jobinfo_field_jobjson")));
+        }
+
+        // ChildJobId valid
+        if (jobInfo.getChildJobId() != null && jobInfo.getChildJobId().trim().length() > 0) {
+            String[] childJobIds = jobInfo.getChildJobId().split(",");
+            for (String childJobIdItem : childJobIds) {
+                if (childJobIdItem != null && childJobIdItem.trim().length() > 0 && isNumeric(childJobIdItem)) {
+                    JobInfo childJobInfo = jobInfoMapper.loadById(Integer.parseInt(childJobIdItem));
+                    if (childJobInfo == null) {
+                        return new ReturnT<String>(ReturnT.FAIL_CODE,
+                                MessageFormat.format((I18nUtil.getString("jobinfo_field_childJobId") + "({0})" + I18nUtil.getString("system_not_found")), childJobIdItem));
+                    }
+                } else {
+                    return new ReturnT<String>(ReturnT.FAIL_CODE,
+                            MessageFormat.format((I18nUtil.getString("jobinfo_field_childJobId") + "({0})" + I18nUtil.getString("system_invalid")), childJobIdItem));
+                }
+            }
+
+            // join , avoid "xxx,,"
+            String temp = "";
+            for (String item : childJobIds) {
+                temp += item + ",";
+            }
+            temp = temp.substring(0, temp.length() - 1);
+
+            jobInfo.setChildJobId(temp);
+        }
+
+        // group valid
+        if(jobInfo.getJobGroup()!=null && jobInfo.getJobGroup()!=0) {
+            JobGroup jobGroup = jobGroupMapper.load(jobInfo.getJobGroup());
+            if (jobGroup == null) {
+                return new ReturnT<>(ReturnT.FAIL_CODE, (I18nUtil.getString("jobinfo_field_jobgroup") + I18nUtil.getString("system_invalid")));
+            }
+        }
+        // stage job info
+        JobInfo exists_jobInfo = jobInfoMapper.loadById(jobInfo.getId());
+        if (exists_jobInfo == null) {
+            return new ReturnT<>(ReturnT.FAIL_CODE, (I18nUtil.getString("jobinfo_field_id") + I18nUtil.getString("system_not_found")));
+        }
+
+        // next trigger time (5s后生效，避开预读周期)
+        long nextTriggerTime = exists_jobInfo.getTriggerNextTime();
+        if (StringUtils.isNotEmpty(jobInfo.getJobCron()) && exists_jobInfo.getTriggerStatus() == 1 && !jobInfo.getJobCron().equals(exists_jobInfo.getJobCron())) {
+            try {
+                Date nextValidTime = new CronExpression(jobInfo.getJobCron()).getNextInvalidTimeAfter(new Date(System.currentTimeMillis() + JobScheduleHelper.PRE_READ_MS));
+                if (nextValidTime == null) {
+                    return new ReturnT<String>(ReturnT.FAIL_CODE, I18nUtil.getString("jobinfo_field_cron_never_fire"));
+                }
+                nextTriggerTime = nextValidTime.getTime();
+            } catch (ParseException e) {
+                logger.error(e.getMessage(), e);
+                return new ReturnT<String>(ReturnT.FAIL_CODE, I18nUtil.getString("jobinfo_field_cron_invalid") + " | " + e.getMessage());
+            }
+        }
+
+//        BeanUtils.copyProperties(jobInfo, exists_jobInfo);
+        // 遍历目标对象的所有字段，检查是否需要保留原有的非空值
+        JobInfo exists_jobInfo1 = BeanUtil.fillBeanWithMap(BeanUtil.beanToMap(jobInfo), exists_jobInfo, CopyOptions.create().setIgnoreNullValue(true));
+
+        if (StringUtils.isBlank(jobInfo.getReplaceParamType())) {
+            jobInfo.setReplaceParamType(DateFormatUtils.TIMESTAMP);
+        }
+        exists_jobInfo1.setTriggerNextTime(nextTriggerTime);
+        exists_jobInfo1.setUpdateTime(new Date());
+        if(jobInfo.getTriggerStatus() == 0){
+            //start方法5秒后没有修改状态，会导致无法定时执行，暂时先修改状态为可执行
+            exists_jobInfo1.setTriggerStatus(1);
+        }
+        exists_jobInfo1.setGlueUpdatetime(new Date());
+        jobInfoMapper.update(exists_jobInfo1);
 
 
         return ReturnT.SUCCESS;

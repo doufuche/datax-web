@@ -18,7 +18,7 @@ public class JobInfo {
 	private int id;
 
 	@ApiModelProperty("执行器主键ID")
-	private int jobGroup;
+	private Integer jobGroup;
 
 	@ApiModelProperty("任务执行CRON表达式")
 	private String jobCron;
@@ -97,10 +97,10 @@ public class JobInfo {
 	private String partitionInfo;
 
 	@ApiModelProperty("最近一次执行状态")
-	private int lastHandleCode;
+	private Integer lastHandleCode;
 
 	@ApiModelProperty("所属项目Id")
-	private int projectId;
+	private Integer projectId;
 
 	@ApiModelProperty("主键字段")
 	private String primaryKey;
@@ -109,7 +109,7 @@ public class JobInfo {
 	private Long incStartId;
 
 	@ApiModelProperty("增量方式")
-	private int incrementType;
+	private Integer incrementType;
 
 	@ApiModelProperty("datax的读表")
 	private  String readerTable;

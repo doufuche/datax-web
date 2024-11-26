@@ -49,6 +49,14 @@ public interface JobService {
     ReturnT<String> update(JobInfo jobInfo);
 
     /**
+     * update job field
+     *
+     * @param jobInfo 仅传递要更新的字段
+     * @return
+     */
+    ReturnT<String> updateField(JobInfo jobInfo);
+
+    /**
      * remove job
      * *
      *
