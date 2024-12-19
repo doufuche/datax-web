@@ -97,7 +97,7 @@ public class JobInfo {
 	private String partitionInfo;
 
 	@ApiModelProperty("最近一次执行状态")
-	private Integer lastHandleCode;
+	private int lastHandleCode;
 
 	@ApiModelProperty("所属项目Id")
 	private Integer projectId;
